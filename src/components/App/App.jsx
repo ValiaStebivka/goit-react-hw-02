@@ -7,20 +7,19 @@ import css from './App.module.css';
 
 export default function App() {
   const [values, setValues] = useState(getInitFeedback);
-  const [clicks, setClicks] = useState(getInitCliksCount);
   const totalFeedback = values.good + values.neutral + values.bad;
   const positiveFeedback = Math.round(((values.good + values.neutral) / totalFeedback) * 100);
-  const isHidden = clicks === 0;
+  const isHidden = totalFeedback === 0;
 
   useEffect(() => {
     window.localStorage.setItem('initial-feedback', JSON.stringify(values));
-    window.localStorage.setItem('initial-clicks-count', JSON.stringify(clicks));
-  }, [values, clicks]);
+    window.localStorage.setItem('initial-clicks-count', JSON.stringify(totalFeedback));
+  }, [values, totalFeedback]);
 
   return (
     <div className={css.container}>
       <Description />
-      <Options onUpdate={onLeaveFeedback} isHidden={isHidden} onReset={onReset} />
+      <Options onFeedbackSelect={onLeaveFeedback} isHidden={isHidden} onReset={onReset} />
       {isHidden ? (
         <Notification />
       ) : (
@@ -34,13 +33,10 @@ export default function App() {
       ...values,
       [type]: values[type] + 1,
     });
-
-    setClicks(clicks + 1);
   }
 
   function onReset() {
     setValues({ ...values, good: 0, neutral: 0, bad: 0 });
-    setClicks(0);
   }
 
   function getInitFeedback() {
@@ -49,14 +45,6 @@ export default function App() {
       return JSON.parse(initFeedback);
     }
     return { good: 0, neutral: 0, bad: 0 };
-  }
-
-  function getInitCliksCount() {
-    const initClicksCount = window.localStorage.getItem('initial-clicks-count');
-    if (initClicksCount !== null) {
-      return JSON.parse(initClicksCount);
-    }
-    return 0;
   }
 
 }
